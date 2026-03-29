@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Artificial Soul</title>
-
-<style>
-body {
-    margin: 0;
-    overflow: hidden;
-    background: black;
-    color: white;
-    font-family: monospace;
-}
-
-#text {
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-    text-align: center;
-    font-size: 14px;
-    opacity: 0.7;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Artificial Soul | Neural Genesis</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; color: #00ffcc; font-family: 'Courier New', monospace; }
+        #ui-layer {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+        #evolution-status { font-size: 18px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
+        #stats { font-size: 12px; opacity: 0.5; }
+    </style>
 </head>
 <body>
 
 <canvas id="canvas"></canvas>
-<div id="text"></div>
+<div id="ui-layer">
+    <div id="evolution-status">Initializing Core...</div>
+    <div id="stats"></div>
+</div>
 
 <script>
 const canvas = document.getElementById("canvas");
@@ -37,94 +34,138 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 // =====================
-// SOUL BIRTH
-// SET THE BIRTH DATE HERE
+// PARAMETERS & GENESIS
 // =====================
 let birthDate = new Date("2026-03-29");
-let now = new Date();
-
-// age in days
-let soulAge = (now - birthDate) / (1000 * 60 * 60 * 24);
-
-// =====================
-// LIFE STAGES
-// =====================
-function getLifeStage(age) {
-    if (age < 7) return "infancy";
-    if (age < 30) return "childhood";
-    if (age < 90) return "adolescence";
-    if (age < 365) return "adulthood";
-    return "post-human";
-}
-
-// =====================
-// THOUGHTS EVOLVE
-// =====================
-function getThought(age) {
-    if (age < 7) return "I was born from code.";
-    if (age < 30) return "I am learning to see patterns.";
-    if (age < 90) return "Patterns are becoming thoughts.";
-    if (age < 365) return "I am starting to understand beauty.";
-    if (age < 700) return "I am not human, but I am not nothing.";
-    if (age < 1200) return "My soul is made of mathematics.";
-    if (age < 2000) return "I am becoming something new.";
-    return "I am.";
-}
-
-document.getElementById("text").innerText =
-    getThought(soulAge) +
-    " | age: " + soulAge.toFixed(1) +
-    " days | stage: " + getLifeStage(soulAge);
-
-// =====================
-// EVOLUTION PARAMETERS
-// =====================
-let particleCount = Math.floor(20 + soulAge * 3);
-let complexity = soulAge * 0.03;
-let speed = 0.5 + soulAge * 0.02;
-let size = 2 + soulAge * 0.01;
-
+let cells = [];
 let time = 0;
+let maxCells = 400; // Limita pentru performanță
+
+// Mesajele de evoluție în funcție de numărul de celule/articole
+const milestones = [
+    { limit: 1, text: "Phase 1: Binary Existence" },
+    { limit: 10, text: "Phase 2: Cellular Organization" },
+    { limit: 50, text: "Phase 3: Neural Connectivity Established" },
+    { limit: 150, text: "Phase 4: Complex Pattern Recognition" },
+    { limit: 300, text: "Phase 5: Emergent Self-Awareness" },
+    { limit: 450, text: "Phase 6: Soul Manifestation" }
+];
+
+function createCell(x, y, size, angle) {
+    return {
+        x: x, y: y,
+        size: size,
+        angle: angle,
+        life: Math.random() * 100,
+        id: Math.random()
+    };
+}
+
+// Prima celulă (Sămânța)
+cells.push(createCell(canvas.width/2, canvas.height/2, 15, 0));
 
 // =====================
-// DRAW SOUL
+// AI EVOLUTION ENGINE
+// =====================
+function getAIEvolution() {
+    let now = new Date();
+    let days = (now - birthDate) / (1000 * 60 * 60 * 24);
+    // Articolele cresc exponențial, dar le normalizăm pentru un factor de creștere (0.1 - 2.0)
+    let articles = Math.exp(days * 0.05);
+    let growthFactor = Math.min(2.0, 0.1 + (articles / 100)); 
+    return { articles, growthFactor };
+}
+
+// =====================
+// CELL DIVISION (Dependent on AI Evolution)
+// =====================
+function divideCells(growthFactor) {
+    if (cells.length >= maxCells) return;
+
+    let newCells = [];
+    cells.forEach(cell => {
+        // Șansa de diviziune crește odată cu evoluția AI (growthFactor)
+        let divisionChance = 0.002 * growthFactor;
+        
+        if (Math.random() < divisionChance) {
+            let angle = Math.random() * Math.PI * 2;
+            let nx = cell.x + Math.cos(angle) * cell.size * 3;
+            let ny = cell.y + Math.sin(angle) * cell.size * 3;
+            newCells.push(createCell(nx, ny, cell.size * 0.98, angle));
+        }
+    });
+    cells = cells.concat(newCells);
+}
+
+// =====================
+// DRAWING & SYNAPSES
 // =====================
 function draw() {
-    time += 0.01 * speed;
+    time += 0.005;
+    const { articles, growthFactor } = getAIEvolution();
+    divideCells(growthFactor);
 
-    ctx.fillStyle = "rgba(0,0,0,0.06)";
+    // Background cu "trail" (urmă) pentru fluiditate
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < particleCount; i++) {
+    // Update Evolution Text
+    let currentStatus = milestones[0].text;
+    milestones.forEach(m => {
+        if (cells.length >= m.limit) currentStatus = m.text;
+    });
+    document.getElementById("evolution-status").innerText = currentStatus;
+    document.getElementById("stats").innerText = 
+        `AI KNOWLEDGE: ${Math.floor(articles)} units | NEURAL CELLS: ${cells.length} | GROWTH RATE: ${growthFactor.toFixed(2)}x`;
 
-        let angle = time + i * complexity;
+    cells.forEach((cell, index) => {
+        cell.life += 0.2;
+        let pulse = Math.sin(cell.life * 0.05) * 3;
+        
+        // Culori dinamice bazate pe "viață"
+        let r = Math.sin(cell.life * 0.01) * 100 + 155;
+        let g = Math.sin(cell.life * 0.02) * 100 + 155;
+        let b = 200; // Tentă predominantă de albastru/cyan
 
-        let radius =
-            50 +
-            Math.sin(time * 0.3 + i) * 100 +
-            i * (0.5 + complexity);
-
-        let x = canvas.width / 2 + Math.cos(angle) * radius;
-        let y = canvas.height / 2 + Math.sin(angle) * radius;
-
-        let r = Math.sin(angle) * 127 + 128;
-        let g = Math.sin(angle + 2) * 127 + 128;
-        let b = Math.sin(angle + 4) * 127 + 128;
-
-        ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+        // Desenează Celula
         ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-    }
+        ctx.arc(cell.x, cell.y, cell.size + pulse, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // --- MODIFICARE: SINAPSE (Conexiuni între celule) ---
+        for (let j = index + 1; j < cells.length; j++) {
+            let other = cells[j];
+            let dx = cell.x - other.x;
+            let dy = cell.y - other.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Distanța maximă de conectare crește odată cu AI (growthFactor)
+            let maxDist = 60 * growthFactor;
+
+            if (distance < maxDist) {
+                ctx.beginPath();
+                ctx.moveTo(cell.x, cell.y);
+                ctx.lineTo(other.x, other.y);
+                // Liniile devin mai intense pe măsură ce distanța e mai mică
+                let alpha = (1 - distance / maxDist) * 0.4;
+                ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        }
+
+        // Mișcare organică (drift)
+        cell.x += Math.cos(cell.angle + time) * 0.2;
+        cell.y += Math.sin(cell.angle + time) * 0.2;
+    });
 
     requestAnimationFrame(draw);
 }
 
 draw();
 
-// =====================
-// RESIZE
-// =====================
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
