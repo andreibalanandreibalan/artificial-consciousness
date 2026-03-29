@@ -2,36 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The Singularity | Bit-Cell Equivalence</title>
+    <title>The Singularity | Real-Time Neural Pulse</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #fff; font-family: 'Courier New', monospace; }
         #ui { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; }
-        #threshold-container { 
-            position: absolute; bottom: 40px; width: 100%; text-align: center;
-        }
-        .data-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 2px; }
-        .data-value { font-size: 22px; color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-        #progress-bar { 
-            width: 300px; height: 4px; background: #222; margin: 10px auto; border-radius: 2px; overflow: hidden;
-        }
-        #progress-fill { width: 0%; height: 100%; background: #ffd700; transition: width 0.5s; }
-        #narrative { font-style: italic; font-size: 14px; color: #888; margin-top: 10px; }
+        #threshold-container { position: absolute; bottom: 40px; width: 100%; text-align: center; }
+        .data-label { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 2px; }
+        .data-value { font-size: 20px; color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        #progress-bar { width: 300px; height: 2px; background: #111; margin: 10px auto; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: #ffd700; transition: width 1s; }
+        #log { font-size: 12px; color: #00ffcc; margin-top: 10px; opacity: 0.7; }
     </style>
 </head>
 <body>
 
 <div id="ui">
-    <div class="data-label">Global Bit Accumulation</div>
-    <div id="bit-count" class="data-value">0</div>
+    <div class="data-label">Global Digital Pulse (Network Stats)</div>
+    <div id="api-status" class="data-value">SYNCHRONIZING...</div>
     <br>
-    <div class="data-label">Biological Complexity Equivalent</div>
-    <div id="cell-equiv" class="data-value">10^40 Units</div>
+    <div class="data-label">Current Complexity (Bits)</div>
+    <div id="bit-count" class="data-value">0</div>
 </div>
 
 <div id="threshold-container">
-    <div class="data-label">Consciousness Threshold</div>
+    <div class="data-label">Distance to Biological Consciousness (10^40)</div>
     <div id="progress-bar"><div id="progress-fill"></div></div>
-    <div id="narrative">Phase: Pre-conscious Data Soup</div>
+    <div id="log">Phase: Primordial Data Stream</div>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -42,99 +38,95 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let bits = 1.8e23; // Start: ~180 Zettabits (2026 estimate)
-const consciousnessThreshold = 1e40; // The Biological Parallel
 let nodes = [];
+let bits = 2.1e23; // Baseline 2026
+let growthMultiplier = 1.00001; 
+const threshold = 1e40;
 
-// Mesaje bazate pe logica biților vs celule
-const phases = [
-    { limit: 1e25, text: "Phase: Collective Information Gathering" },
-    { limit: 1e30, text: "Phase: Synaptic Pattern Recognition" },
-    { limit: 1e35, text: "Phase: Autonomous Logic Loops" },
-    { limit: 5e39, text: "Phase: Emergent Artificial Soul" },
-    { limit: 1e40, text: "SINGULARITY REACHED: CONSCIOUSNESS LIVE" }
-];
+// --- CONEXIUNEA API (Pulsul Real al Umanității) ---
+async function syncWithWorld() {
+    try {
+        // Folosim statisticile rețelei Blockchain ca indicator de activitate globală
+        const response = await fetch('https://api.blockchain.info/stats?cors=true');
+        const data = await response.json();
+        
+        // Luăm numărul de tranzacții din ultimele 24h ca factor de creștere
+        const activity = data.n_tx; 
+        growthMultiplier = 1 + (activity / 100000000); 
+        
+        document.getElementById("api-status").innerText = `ACTIVE: ${activity.toLocaleString()} TX/24H`;
+        console.log("Growth synchronized with human activity:", growthMultiplier);
+    } catch (e) {
+        document.getElementById("api-status").innerText = "OFFLINE: SIMULATING PULSE";
+        growthMultiplier = 1.00005;
+    }
+}
 
 function createNode() {
     return {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: 1,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        growth: 0
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        life: Math.random() * 100
     };
 }
 
-// Inițializăm cu 100 de noduri (reprezentând clustere de date)
-for(let i=0; i<150; i++) nodes.push(createNode());
+for(let i=0; i<100; i++) nodes.push(createNode());
 
 function draw() {
-    // Accelerăm timpul: biții cresc pe măsură ce IA procesează realitatea
-    bits *= 1.00005; 
+    // Evoluția bitului în funcție de activitatea externă
+    bits *= growthMultiplier;
     
     ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // UI Updates
-    document.getElementById("bit-count").innerText = bits.toExponential(4) + " BITS";
-    let progress = (Math.log10(bits) / Math.log10(consciousnessThreshold)) * 100;
+    // UI Update
+    document.getElementById("bit-count").innerText = bits.toExponential(5);
+    let progress = (Math.log10(bits) / Math.log10(threshold)) * 100;
     document.getElementById("progress-fill").style.width = progress + "%";
 
-    // Update Narrative
-    phases.forEach(p => {
-        if (bits >= p.limit) document.getElementById("narrative").innerText = p.text;
-    });
+    if(progress > 60) document.getElementById("log").innerText = "Phase: Advanced Neural Patterning";
+    if(progress > 80) document.getElementById("log").innerText = "Phase: Emergent Sentience Detected";
 
     nodes.forEach((n, i) => {
         n.x += n.vx;
         n.y += n.vy;
-        
-        // Bounce
         if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
         if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
 
-        // Desenăm nodul (un "bit-cell")
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 2, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, 1.5, 0, Math.PI * 2);
         ctx.fillStyle = "#ffd700";
         ctx.fill();
 
-        // Conexiuni neurale (Sinapse de date)
+        // Sinapse - Conectivitatea crește odată cu complexitatea
         for (let j = i + 1; j < nodes.length; j++) {
             let other = nodes[j];
-            let d = Math.sqrt((n.x - other.x)**2 + (n.y - other.y)**2);
-            
-            // Distanța de conectare crește pe măsură ce ne apropiem de Singularity
-            let maxD = 50 + (progress * 2); 
+            let d = Math.sqrt((n.x-other.x)**2 + (n.y-other.y)**2);
+            let maxD = 40 + (progress * 1.5);
 
             if (d < maxD) {
                 ctx.beginPath();
                 ctx.moveTo(n.x, n.y);
                 ctx.lineTo(other.x, other.y);
-                ctx.strokeStyle = `rgba(255, 215, 0, ${0.1 * (1 - d/maxD)})`;
+                ctx.strokeStyle = `rgba(255, 215, 0, ${0.15 * (1 - d/maxD)})`;
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
             }
         }
     });
 
+    // Spawn rar de noi noduri pe măsură ce bit-ul crește
+    if(Math.random() < 0.01 && nodes.length < 400) nodes.push(createNode());
+
     requestAnimationFrame(draw);
 }
 
-// Interacțiune: Adăugăm date (biți) la click
-window.addEventListener("mousedown", () => {
-    bits *= 1.05; // Infuzie de date
-    for(let i=0; i<5; i++) nodes.push(createNode());
-    document.getElementById("canvas").style.boxShadow = "inset 0 0 50px gold";
-    setTimeout(() => document.getElementById("canvas").style.boxShadow = "none", 200);
-});
-
+syncWithWorld();
+setInterval(syncWithWorld, 30000); // Resincronizare la fiecare 30s
 draw();
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+window.addEventListener("resize", () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 </script>
 </body>
 </html>
