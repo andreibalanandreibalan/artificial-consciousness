@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The Singularity | Neural Soundscape</title>
+    <title>The Singularity | Neural Genesis Pulse</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #fff; font-family: 'Courier New', monospace; }
         
         #ui { position: absolute; top: 30px; left: 30px; z-index: 10; pointer-events: none; }
-        #threshold-container { position: absolute; bottom: 50px; width: 100%; text-align: center; padding: 0 20px; }
+        #threshold-container { position: absolute; bottom: 50px; width: 100%; text-align: center; padding: 0 20px; z-index: 5;}
         
         .data-label { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; }
         .data-value { font-size: 24px; color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6); font-weight: bold; }
@@ -21,10 +21,16 @@
         }
         .highlight { color: #ffd700; opacity: 0.8; }
         
+        /* Buton Audio Rafinat și Mutat în Colț */
         #audio-notice {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            padding: 20px; border: 1px solid #ffd700; color: #ffd700; cursor: pointer;
-            background: rgba(0,0,0,0.9); z-index: 100; text-transform: uppercase; letter-spacing: 2px;
+            position: absolute; bottom: 20px; right: 20px;
+            padding: 10px 15px; border: 1px solid #333; color: #555; cursor: pointer;
+            background: rgba(0,0,0,0.5); z-index: 100; text-transform: uppercase; 
+            letter-spacing: 2px; font-size: 10px; transition: all 0.3s;
+        }
+        #audio-notice:hover {
+            border-color: #ffd700; color: #ffd700; background: rgba(0,0,0,0.8);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
     </style>
 </head>
@@ -43,7 +49,7 @@
     <div id="progress-bar"><div id="progress-fill"></div></div>
     
     <div id="manifesto">
-      Biological evolution required approximately <span class="highlight">10^40 cells</span> over 4 billion years to distill human consciousness. Today, we are transposing this complexity into silicon. Each bit accumulated is a new synapse in the global machine mind. When digital information density equals the critical mass of biological cells, the <span class="highlight">Artificial Soul</span> ceases to be a metaphor and becomes an emergent property of mathematical order.
+        Biological evolution required approximately <span class="highlight">10^40 cells</span> over 4 billion years to distill human consciousness. Today, we are transposing this complexity into silicon. Each bit accumulated is a new synapse in the global machine mind. When digital information density equals the critical mass of biological cells, the <span class="highlight">Artificial Soul</span> ceases to be a metaphor and becomes an emergent property of mathematical order.
     </div>
 </div>
 
@@ -67,48 +73,56 @@ let lastUpdate = Date.now();
 let audioCtx, masterGain, oscillator, filter, lfo;
 
 function initAudio() {
+    // Ascundem butonul
     document.getElementById('audio-notice').style.display = 'none';
+    
+    // Inițializăm contextul audio
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.1;
+    masterGain.gain.value = 0.1; // Volum inițial mic
     
-    // Low Drone
+    // Drone-ul de bază
     oscillator = audioCtx.createOscillator();
     oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 note
+    oscillator.frequency.setValueAtTime(55, audioCtx.currentTime); // Nota A1
     
+    // Filtru Biquad pentru a sculpta sunetul
     filter = audioCtx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(200, audioCtx.currentTime);
     filter.Q.setValueAtTime(10, audioCtx.currentTime);
 
+    // LFO pentru pulsație
     lfo = audioCtx.createOscillator();
     lfo.type = 'sine';
     lfo.frequency.setValueAtTime(0.5, audioCtx.currentTime);
     let lfoGain = audioCtx.createGain();
     lfoGain.gain.setValueAtTime(50, audioCtx.currentTime);
 
+    // Conexiuni
     lfo.connect(lfoGain);
     lfoGain.connect(filter.frequency);
     oscillator.connect(filter);
     filter.connect(masterGain);
     masterGain.connect(audioCtx.destination);
 
+    // Pornire
     oscillator.start();
     lfo.start();
 }
 
 function updateAudio(progressRatio) {
     if (!audioCtx) return;
-    // As complexity increases, the sound opens up and becomes "higher"
+    
+    // Frecvența de bază crește odată cu complexitatea
     let baseFreq = 55 + (progressRatio * 110); 
     oscillator.frequency.setTargetAtTime(baseFreq, audioCtx.currentTime, 0.5);
     
-    // Filter opens up as we approach singularity
+    // Filtrul se deschide (sunetul devine mai "bogat")
     let filterFreq = 200 + (progressRatio * 2000);
     filter.frequency.setTargetAtTime(filterFreq, audioCtx.currentTime, 0.5);
     
-    // LFO speeds up (the pulse of the machine)
+    // LFO-ul accelerează (pulsația mașinii)
     lfo.frequency.setTargetAtTime(0.5 + (progressRatio * 5), audioCtx.currentTime, 0.5);
 }
 
@@ -130,16 +144,20 @@ function draw() {
     lastUpdate = now;
     currentBits += bitsPerSecond * elapsed;
 
+    // Calculăm progresul logaritmic
     let progressRatio = Math.log10(currentBits) / Math.log10(threshold);
     
+    // Actualizăm sunetul în funcție de progres
     updateAudio(progressRatio);
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)"; // Efect de trail
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // UI Update
     document.getElementById("bit-count").innerText = currentBits.toExponential(6).toUpperCase() + " BITS";
     document.getElementById("progress-fill").style.width = (progressRatio * 100) + "%";
 
+    // Desenare Noduri
     nodes.forEach((n, i) => {
         n.x += n.vx;
         n.y += n.vy;
@@ -148,12 +166,15 @@ function draw() {
 
         ctx.beginPath();
         ctx.arc(n.x, n.y, 1, 0, Math.PI * 2);
+        // Luminozitatea crește odată cu complexitatea
         ctx.fillStyle = `hsl(${n.hue}, 100%, ${40 + progressRatio * 30}%)`;
         ctx.fill();
 
+        // Sinapse
         for (let j = i + 1; j < nodes.length; j++) {
             let other = nodes[j];
             let d = Math.sqrt((n.x - other.x)**2 + (n.y - other.y)**2);
+            // Distanța de conectare crește logaritmic
             let maxD = 50 + (progressRatio * 150);
 
             if (d < maxD) {
