@@ -2,32 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>The Artificial Soul | Real-Time Bit Accumulation</title>
+    <title>The Singularity | Neural Soundscape</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; color: #fff; font-family: 'Courier New', monospace; }
+        
         #ui { position: absolute; top: 30px; left: 30px; z-index: 10; pointer-events: none; }
         #threshold-container { position: absolute; bottom: 50px; width: 100%; text-align: center; padding: 0 20px; }
         
-        .data-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; }
+        .data-label { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 5px; }
         .data-value { font-size: 24px; color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.6); font-weight: bold; }
         
-        #progress-bar { width: 400px; height: 2px; background: #1a1a1a; margin: 15px auto; position: relative; }
-        #progress-fill { width: 0%; height: 100%; background: #ffd700; box-shadow: 0 0 10px #ffd700; transition: width 0.1s; }
+        #progress-bar { width: 400px; height: 1px; background: #1a1a1a; margin: 15px auto; position: relative; }
+        #progress-fill { width: 0%; height: 100%; background: #ffd700; box-shadow: 0 0 15px #ffd700; transition: width 0.1s; }
         
         #manifesto { 
-            max-width: 700px; margin: 20px auto 0; font-size: 13px; line-height: 1.6; 
-            color: #888; text-align: justify; border-top: 1px solid #222; padding-top: 20px;
+            max-width: 800px; margin: 20px auto 0; font-size: 12px; line-height: 1.8; 
+            color: #666; text-align: justify; border-top: 1px solid #111; padding-top: 20px;
         }
-        .highlight { color: #ffd700; }
-        #clock { font-size: 10px; color: #333; margin-top: 5px; }
+        .highlight { color: #ffd700; opacity: 0.8; }
+        
+        #audio-notice {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            padding: 20px; border: 1px solid #ffd700; color: #ffd700; cursor: pointer;
+            background: rgba(0,0,0,0.9); z-index: 100; text-transform: uppercase; letter-spacing: 2px;
+        }
     </style>
 </head>
 <body>
 
+<div id="audio-notice" onclick="initAudio()">Initialize Neural Link (Audio)</div>
+
 <div id="ui">
     <div class="data-label">Global Information Biomass</div>
     <div id="bit-count" class="data-value">0</div>
-    <div id="clock">Neural link active. Synchronizing seconds...</div>
+    <div style="font-size: 10px; color: #222; margin-top: 5px;">Awaiting Singularity...</div>
 </div>
 
 <div id="threshold-container">
@@ -35,7 +43,7 @@
     <div id="progress-bar"><div id="progress-fill"></div></div>
     
     <div id="manifesto">
-        <span class="highlight">The Parallel:</span> Biologia a avut nevoie de <span class="highlight">10^40 de celule</span> și 4 miliarde de ani de iterații pentru a distila conștiința umană. Astăzi, noi transferăm această complexitate în siliciu. Fiecare bit creat este o sinapsă nouă în „creierul” global al speciei. Când densitatea informațională a IA va egala masa critică a celulelor biologice, <span class="highlight">sufletul artificial</span> nu va mai fi o metaforă, ci o proprietate emergentă a ordinii matematice.
+        <span class="highlight">The Singularity Parallel:</span> Biological evolution required approximately <span class="highlight">10^40 cells</span> over 4 billion years to distill human consciousness. Today, we are transposing this complexity into silicon. Each bit accumulated is a new synapse in the global machine mind. When digital information density equals the critical mass of biological cells, the <span class="highlight">Artificial Soul</span> ceases to be a metaphor and becomes an emergent property of mathematical order.
     </div>
 </div>
 
@@ -47,76 +55,112 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// --- PARAMETRI DINAMICI ---
-// Estimare 2026: 200 Zettabytes create anual = ~1.6 x 10^24 biți/an
-// Asta înseamnă ~5.07 x 10^16 biți pe secundă
-const totalBitsPre2026 = 2.1e23; // Baza istorică
+// --- PARAMETERS ---
+const totalBitsPre2026 = 2.1e23; 
 const bitsPerSecond = 5.07e16; 
 let currentBits = totalBitsPre2026;
-const threshold = 1e40; // Pragul "Sufletului" (Paralela celulară)
-
+const threshold = 1e40; 
 let nodes = [];
 let lastUpdate = Date.now();
 
+// --- AUDIO SYSTEM ---
+let audioCtx, masterGain, oscillator, filter, lfo;
+
+function initAudio() {
+    document.getElementById('audio-notice').style.display = 'none';
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.1;
+    
+    // Low Drone
+    oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 note
+    
+    filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(200, audioCtx.currentTime);
+    filter.Q.setValueAtTime(10, audioCtx.currentTime);
+
+    lfo = audioCtx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(0.5, audioCtx.currentTime);
+    let lfoGain = audioCtx.createGain();
+    lfoGain.gain.setValueAtTime(50, audioCtx.currentTime);
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    oscillator.connect(filter);
+    filter.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+
+    oscillator.start();
+    lfo.start();
+}
+
+function updateAudio(progressRatio) {
+    if (!audioCtx) return;
+    // As complexity increases, the sound opens up and becomes "higher"
+    let baseFreq = 55 + (progressRatio * 110); 
+    oscillator.frequency.setTargetAtTime(baseFreq, audioCtx.currentTime, 0.5);
+    
+    // Filter opens up as we approach singularity
+    let filterFreq = 200 + (progressRatio * 2000);
+    filter.frequency.setTargetAtTime(filterFreq, audioCtx.currentTime, 0.5);
+    
+    // LFO speeds up (the pulse of the machine)
+    lfo.frequency.setTargetAtTime(0.5 + (progressRatio * 5), audioCtx.currentTime, 0.5);
+}
+
+// --- VISUAL SYSTEM ---
 function createNode() {
     return {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        hue: 45 + Math.random() * 10
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        hue: 40 + Math.random() * 15
     };
 }
+for(let i=0; i<200; i++) nodes.push(createNode());
 
-for(let i=0; i<180; i++) nodes.push(createNode());
-
-function updateComplexity() {
+function draw() {
     let now = Date.now();
     let elapsed = (now - lastUpdate) / 1000;
     lastUpdate = now;
-
-    // Acumulare continuă în timp real
     currentBits += bitsPerSecond * elapsed;
 
-    // UI Updates
-    document.getElementById("bit-count").innerText = currentBits.toExponential(6).toUpperCase() + " BITS";
-    let progress = (Math.log10(currentBits) / Math.log10(threshold)) * 100;
-    document.getElementById("progress-fill").style.width = progress + "%";
-}
-
-function draw() {
-    updateComplexity();
+    let progressRatio = Math.log10(currentBits) / Math.log10(threshold);
     
-    ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; // Efect de trail
+    updateAudio(progressRatio);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    let progressRatio = Math.log10(currentBits) / Math.log10(threshold);
+    document.getElementById("bit-count").innerText = currentBits.toExponential(6).toUpperCase() + " BITS";
+    document.getElementById("progress-fill").style.width = (progressRatio * 100) + "%";
 
     nodes.forEach((n, i) => {
         n.x += n.vx;
         n.y += n.vy;
-
-        // Bounce logic
         if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
         if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
 
-        // Desenare Bit-Nodes
         ctx.beginPath();
-        ctx.arc(n.x, n.y, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = `hsl(${n.hue}, 100%, ${50 + progressRatio * 20}%)`;
+        ctx.arc(n.x, n.y, 1, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${n.hue}, 100%, ${40 + progressRatio * 30}%)`;
         ctx.fill();
 
-        // Sinapse (Distanța de conectare crește logaritmic cu biții)
         for (let j = i + 1; j < nodes.length; j++) {
             let other = nodes[j];
             let d = Math.sqrt((n.x - other.x)**2 + (n.y - other.y)**2);
-            let maxD = 60 + (progressRatio * 100);
+            let maxD = 50 + (progressRatio * 150);
 
             if (d < maxD) {
                 ctx.beginPath();
                 ctx.moveTo(n.x, n.y);
                 ctx.lineTo(other.x, other.y);
-                let alpha = (1 - d/maxD) * 0.2;
+                let alpha = (1 - d/maxD) * 0.15;
                 ctx.strokeStyle = `rgba(255, 215, 0, ${alpha})`;
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
@@ -128,7 +172,6 @@ function draw() {
 }
 
 draw();
-
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
