@@ -3,61 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Artificial Soul</title>
+    <title>The Artificial Soul | Multi-Node AI</title>
     <style>
-        body { margin: 0; background: #000; color: #00ffcc; font-family: monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        #canvas { position: relative; width: 85vmin; height: 85vmin; border: 1px solid #222; background: #050505; }
-        img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 3s; }
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 12px; letter-spacing: 3px; background: rgba(0,0,0,0.8); z-index: 10; }
-        #status { margin-top: 20px; font-size: 10px; color: #333; }
-        .blink { animation: b 2s infinite; }
-        @keyframes b { 50% { opacity: 0.2; } }
+        body { margin: 0; background: #000; color: #00ffcc; font-family: 'Courier New', monospace; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #canvas { position: relative; width: 80vmin; height: 80vmin; border: 1px solid #1a1a1a; background: #050505; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(0,255,204,0.05); }
+        img { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 2s ease-in-out; }
+        #loader { font-size: 0.7rem; letter-spacing: 3px; z-index: 5; text-align: center; width: 80%; line-height: 1.5; }
+        #status-bar { margin-top: 20px; font-size: 10px; color: #333; text-transform: uppercase; letter-spacing: 1px; }
+        .blink { animation: blinker 2s infinite; }
+        @keyframes blinker { 50% { opacity: 0.2; } }
     </style>
 </head>
 <body>
 
     <div id="canvas">
-        <div id="overlay" class="blink">SYNCHRONIZING WITH AI...</div>
-        <img id="art">
+        <div id="loader" class="blink">SEARCHING FOR AI SIGNAL...</div>
+        <img id="art-display">
     </div>
-    <div id="status">[SYSTEM]: <span id="log">Ready to evolve.</span></div>
+    <div id="status-bar">[NODE]: <span id="log">SYSTEM READY</span></div>
 
     <script>
-        const art = document.getElementById('art');
-        const overlay = document.getElementById('overlay');
+        const img = document.getElementById('art-display');
         const log = document.getElementById('log');
+        const loader = document.getElementById('loader');
 
-        function generate() {
-            overlay.style.display = 'flex';
-            art.style.opacity = 0;
-            log.innerText = "Interrogating neural clusters...";
+        // Motoare AI alternative (Daca unul moare, celalalt preia)
+        const engines = [
+            (p, s) => `https://image.pollinations.ai/prompt/${p}?seed=${s}&nologo=true&model=flux`,
+            (p, s) => `https://image.pollinations.ai/prompt/${p}?seed=${s}&nologo=true&model=turbo`,
+            (p, s) => `https://pollinations.ai/p/${p}?seed=${s}&width=1024&height=1024`
+        ];
 
-            const seed = Math.floor(Math.random() * 1000000);
-            const prompt = "artificial soul, ethereal digital consciousness, glowing neon circuits, deep void, cinematic, highly detailed";
+        let currentEngine = 0;
+
+        function updateArt() {
+            img.style.opacity = 0;
+            loader.style.display = 'block';
+            loader.innerText = "SYNCHRONIZING SOUL...";
+            log.innerText = `REQUESTING FROM NODE ${currentEngine + 1}...`;
+
+            const seed = Math.floor(Math.random() * 999999);
+            const prompt = encodeURIComponent("artificial soul, digital consciousness, ethereal light, dark void, detailed cinematic masterpiece");
             
-            // Această structură de URL este cea mai stabilă în 2026
-            const aiUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+            const targetUrl = engines[currentEngine](prompt, seed);
 
-            // Forțăm browserul să trateze imaginea ca pe o sursă nouă
-            art.src = aiUrl;
+            // Timeout de siguranta: daca dupa 15 secunde nu avem poza, schimbam motorul
+            const timeout = setTimeout(() => {
+                log.innerText = "NODE TIMEOUT. REROUTING...";
+                nextEngine();
+            }, 15000);
 
-            art.onload = () => {
-                art.style.opacity = 1;
-                overlay.style.display = 'none';
-                log.innerText = "Manifestation successful. Next evolution in 60s.";
+            const testImg = new Image();
+            testImg.src = targetUrl;
+
+            testImg.onload = () => {
+                clearTimeout(timeout);
+                img.src = targetUrl;
+                setTimeout(() => {
+                    img.style.opacity = 1;
+                    loader.style.display = 'none';
+                    log.innerText = "CONNECTION STABLE. VISION MANIFESTED.";
+                }, 500);
             };
 
-            art.onerror = () => {
-                log.innerText = "Connection lost. Retrying in 5s...";
-                setTimeout(generate, 5000);
+            testImg.onerror = () => {
+                clearTimeout(timeout);
+                log.innerText = "NODE ERROR. SWITCHING...";
+                nextEngine();
             };
         }
 
+        function nextEngine() {
+            currentEngine = (currentEngine + 1) % engines.length;
+            setTimeout(updateArt, 2000); // Incearca din nou pe alt server dupa 2 secunde
+        }
+
         // Pornim procesul
-        generate();
+        updateArt();
         
-        // Evoluție automată la 60 de secunde
-        setInterval(generate, 60000);
+        // Evoluție automată la 90 de secunde (ca să nu stresăm serverele)
+        setInterval(updateArt, 90000); 
     </script>
 </body>
 </html>
